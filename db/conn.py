@@ -1,30 +1,49 @@
 import psycopg2
+from psycopg2 import OperationalError
 
-class DBConnect:
-    cursor = ''
-    conn = ''
+credenciais = {
+    'hostname': 'postgres.railway.internal',
+    'user': 'postgres',
+    'password': 'mjdFnZrxSxsLIavWgBfyijxOnWEytXBY',
+    'db': 'railway',
+    'port': 5432,
+}
 
-    credenciais = {
-        'hostname': 'localhost',
-        'user': 'root',
-        'senha': '',
-        'db': 'usuarios',
-        'port': 3306,
-    }
+def cria_conexao():
+    print("Tentando conectar ao banco...")
+    try:
+        conn = psycopg2.connect(
+            database=credenciais['db']
+            ,user=credenciais['user']
+            ,password=credenciais['password']
+            ,host=credenciais['hostname']
+            ,port=credenciais['port']
+            )
+        return conn
+        print("Conexão bem-sucedida ao banco.")
+    except OperationalError as e:
+        print(f"Erro ao conectar-se ao DB: {e}")
 
-    def conn(self):
-        conn = psycopg2.connect(database=self.credenciais["hostname"], user=self.credenciais["user"], password=self.self.credenciais["senha"], dbname=self.credenciais["db"], port=self.credenciais["porta"])
-        
-        self.cursor = conn.cursor()
-        self.conn = conn
 
-        pass
+def cria_tabela(conn):
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS livros (
+                id SERIAL PRIMARY KEY,
+                nome VARCHAR(100) NOT NULL,
+                ano INT NOT NULL,
+                editora VARCHAR(100) NOT NULL,
+                genero VARCHAR(100) NOT NULL
+            );
+            """)
+            conn.commit()
+            print("Tabela 'livros' criada com sucesso.")
+    except Exception as e:
+        print(f"Erro ao criar tabela: {e}")
 
-    def set_cursor(self, conn):
-        self.cursor = conn.cursor()
-
-    def get_cursor(self):
-        return self.cursor
-    
-    def get_conn(self):
-        return self.conn
+if __name__ == "__main__":
+    conn = cria_conexao()
+    if conn:
+        cria_tabela(conn)
+        conn.close()
