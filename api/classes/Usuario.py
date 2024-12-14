@@ -5,6 +5,5 @@ class Usuario_Modelo(BaseModel):
     nome: str
     sobrenome: str
     email: str
-    documento: str | None = None
     ativo: bool
-    data_de_criacao: date
+    data_de_criacao: date | None = None
